@@ -1,0 +1,87 @@
+---
+title: "uts"
+author: "Lara Ayu Cahyaningtyas"
+date: "10/27/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+
+## Preprocessing
+```{r}
+library(readr)
+data <- read_csv("seeds_datasett.txt", col_names = FALSE)
+head(data)
+
+#melihat dan membuang data NA
+sapply(data, function(x) sum(is.na(x)))
+data <- na.omit(data)
+
+#mengubah nama variabel
+colnames(data)<-c("area", "perimeter", "compactness", "length", "width", "asymmetry", "length_kernelgroove", "biji")
+head(data)
+
+#diubah menjadi data kategorik
+data$area<-as.factor(ifelse(data$area > median(data$area), "big", "small"))
+data$perimeter<-as.factor(ifelse(data$perimeter > median(data$perimeter), "big", "small"))
+data$compactness<-as.factor(ifelse(data$compactness > median(data$compactness), "high", "low"))
+data$length<-as.factor(ifelse(data$length > median(data$length), "long", "short"))
+data$width<-as.factor(ifelse(data$width > median(data$width), "long", "short"))
+data$asymmetry<-as.factor(ifelse(data$asymmetry > median(data$asymmetry), "long", "short"))
+data$length_kernelgroove<-as.factor(ifelse(data$length_kernelgroove > median(data$length_kernelgroove), "long", "short"))
+str(data) 
+# ternyata data biji masih terdapat angka decimal dan belum kategorik
+
+data$biji<-cut(data$biji, breaks = c(0.99,1.99,2.99,3.99,4.99,5.99), labels=c(1,2,3,4,5))
+data$biji<-as.factor(data$biji)
+str(data) 
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(party)
+library(psych)
+library(caret)
+```
+
+### Split Data
+Memecah data menjadi data training (80% dari data awal) dan data test (20% dari data awal)
+```{r}
+set.seed(1234)
+sampel <- sample(2,nrow(data),replace = T, prob = c(0.8,0.2))
+trainingdat <- data[sampel==1, ]
+testingdat <- data[sampel==2, ]
+print(paste("Jumlah train data :", nrow(trainingdat)))
+print(paste("Jumlah test data :", nrow(testingdat)))
+```
+### Membuat Model
+```{r}
+pohonnya <- ctree(biji~., data=trainingdat)
+plot(pohonnya)
+```
+Cara membaca pohon untuk kasus :
+area: big, perimeter: big, compactness: low, length: long, width: long, asymmetry: short, length_kernelgroove: short
+
+Dapat dilihat dari pohon di atas, area big berarti bercabang ke arah kanan pada length_kernelgroove, lihat length_kernelgroove. yg diminta pada kasus adalah short, berarti mengarah pada node 6. Maka dapat ditarik kesimpulan berdasarkan kasus diatas maka masuk kedalam klasifikasi biji 1.
+
+
+### Model Evaluation
+#### Sebelum dilakukan prunning
+```{r}
+prediksi <- predict(pohonnya, testingdat)
+confusionMatrix(table(prediksi,testingdat$biji))
+```
+Berdasarkan confusion matrix, diperoleh nilai accuracy adalah sebesar 0.9231. Hal ini memiliki makna bahwa akurasi prediksi model decision tree dalam mengklasifikasikan biji atau benih  adalah sebesar 92%.
+
+Sensitivity/Recal, adalah banyaknya prediksi positif yang benar per total positif sebenarny (aktual). Nilai recall untuk class biji 1, 2, dan 3 menunjukkan angka sebesar 0.8, 1, dan 0.94.
+
+Specificity, adalah banyaknya prediksi negatif yang benar, per total negatif sebenarnya. 
+Spesifisity dari class 1 adalah 0.9655. Dari total kelompok selain 1, 96.5% diantaranya diprediksi dengan benar oleh model.
+
+Spesifisity dari class 2 adalah 1. Dari total kelompok selain 2, semuanya diprediksi dengan benar oleh model.
+Spesifisity dari class 3 adalah 0.9091. Dari total kelompok selain 3, 91% diantaranya diprediksi dengan benar oleh model.
+
+
+
