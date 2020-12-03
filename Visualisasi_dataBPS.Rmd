@@ -1,0 +1,180 @@
+---
+title: "Visualisasi Data"
+author: "Lara Ayu Cahyaningtyas"
+date: "10/2/2020"
+output: word_document
+---
+
+# Statistik Deskriptif dan Eksplorasi Data Secara Visual
+
+Data yang digunakan merupakan data yang diambil dari BPS, yaitu data Rata-rata Harga Gabah Bulanan Menurut Kualitas, Komponen Mutu dan HPP di Tingkat Penggilingan 2020. Data ini terdiri dari 12 variabel, yaitu :
+  1. Bulan : dari Januri hingga September
+  2. Harga_GKG : Harga Gabah Kering Giling (GKG) (Rp/Kg)
+  3. Harga_GKP : Harga Gabah Kering Panen (GKP) (Rp/Kg)
+  4. Harga_GLK : Harga Gabah Luar Kualitas (Rp/Kg)
+  5. KadarAir_GKG : Kadar Air - Gabah Kering Giling (GKG) (%)
+  6. KAdarAir_GKP : Kadar Air - Gabah Kering Panen (GKP) (%)
+  7. KadarAir_GLK : Kadar Air - Gabah Luar Kualitas (%)
+  8. KadarHampa_GKG : Kadar Hampa/Kotoran - Gabah Kering Giling (GKG) (%)
+  9. KadarHampa_GKP : Kadar Hampa/Kotoran - Gabah Kering Panen (GKP) (%)
+  10. KadarHampa_GLK : Kadar Hampa/Kotoran - Gabah Luar Kualitas (%)
+  11. HPP_GKG : Harga Pembelian Pemerintah (HPP) - Gabah Kering Giling (GKG) (Rp/Kg)
+  12. HPP_GKP : Harga Pembelian Pemerintah (HPP) - Gabah Kering Panen (GKP) (Rp/Kg)
+
+Keterangan (Menurut BPS) :
+  - Gabah : Bulir buah hasil tanaman padi (Oryza Sativa Linaeus) yang telah dilepaskan dari tangkainya dengan cara dirontokkan.
+  - Harga Pembelian Pemerintah (HPP) : Harga minimal yang harus dibayarkan pihak penggilingan kepada petani sesuai dengan kualitas gabah sebagaimana yang telah ditetapkan Pemerintah. Penetapan harga dilakukan secara kolektif antara Departemen Pertanian, Menko Bidang Perekonomian, dan Bulog. 
+  - Gabah Kering Giling (GKG) : Gabah yang mengandung kadar air maksimum sebesar 14,0 persen dan hampa/kotoran maksimum 3,0 persen.
+  - Gabah Kering Panen (GKP) : Gabah yang mengandung kadar air maksimum sebesar 25,0 persen dan hampa/kotoran maksimum 10,0 persen.
+  - Kadar Air (KA) : Jumlah kandungan air dalam butir gabah yang dinyatakan dalam persentase dari berat basah.
+  - Kadar Hampa/Kotoran : Jumlah kandungan butir hampa dan kotoran dalam butir gabah yang dinyatakan dalam persentase. 
+  - Mulai Januari 2020 gabah Kualitas Rendah diganti dengan Luar Kualitas sesuai dengan Inpres RI Nomor 5 Tahun 2015
+
+Sumber : https://www.bps.go.id/subject/36/harga-produsen.html
+
+
+```{r}
+library(readxl)
+library(reshape2)
+library(ggplot2)
+library(corrplot)
+library(dplyr)
+Ratarata_harga_gabah <- read_excel("C:\\Users\\User\\Documents\\Ratarata_harga_gabah.xlsx")
+head(Ratarata_harga_gabah)
+str(Ratarata_harga_gabah)
+#mengubah type
+Ratarata_harga_gabah$Harga_GKG<-as.numeric(Ratarata_harga_gabah$Harga_GKG)
+Ratarata_harga_gabah$Harga_GKP<-as.numeric(Ratarata_harga_gabah$Harga_GKP)
+Ratarata_harga_gabah$Harga_GLK<-as.numeric(Ratarata_harga_gabah$Harga_GLK)
+Ratarata_harga_gabah$KadarAir_GKG<-as.numeric(Ratarata_harga_gabah$KadarAir_GKG)
+Ratarata_harga_gabah$KadarAir_GKP<-as.numeric(Ratarata_harga_gabah$KadarAir_GKP)
+Ratarata_harga_gabah$KadarAir_GLK<-as.numeric(Ratarata_harga_gabah$KadarAir_GLK)
+Ratarata_harga_gabah$KadarHampa_GKG<-as.numeric(Ratarata_harga_gabah$KadarHampa_GKG)
+Ratarata_harga_gabah$KadarHampa_GKP<-as.numeric(Ratarata_harga_gabah$KadarHampa_GKP)
+Ratarata_harga_gabah$KadarHampa_GLK<-as.numeric(Ratarata_harga_gabah$KadarHampa_GLK)
+Ratarata_harga_gabah$HPP_GKP<-as.numeric(Ratarata_harga_gabah$HPP_GKP)
+Ratarata_harga_gabah$HPP_GKG<-as.numeric(Ratarata_harga_gabah$HPP_GKG)
+Ratarata_harga_gabah$Bulan<-as.factor(Ratarata_harga_gabah$Bulan)
+str(Ratarata_harga_gabah)
+```
+
+
+
+## Ukuran Pemusatan dan Penyebaran
+
+```{r}
+round(colMeans(Ratarata_harga_gabah[,-1]), digits = 2)
+```
+Nilai rata-rata dari bulan Januari-September 2020 untuk :
+  1. Harga gabah kering giling = Rp 5.761,30 /kg
+  2. Harga gabah kering panen = Rp 4.966,83 /kg
+  3. Harga gabah luar kualitas = Rp 4.578,64 /kg
+  4. Kadar Air pada gabah kering giling =  12.69 %
+  5. Kadar Air pada gabah kering panen = 19.28 % 
+  6. Kadar Air pada gabah luar kualitas = 23.94 % 
+  7. Kadar hampa/kotoran pada gabah kering giling = 3.76 % 
+  8. Kadar hampa/kotoran pada gabah kering panen = 4.99 %  
+  9. Kadar hampa/kotoran pada gabah luar kualitas = 11.64 % 
+  10. Harga Pembelian Pemerintah pada gabah kering giling = Rp 5.033,33 /kg
+  11. Harga Pembelian Pemerintah pada gabah kering panen = Rp 4.083,33 /kg
+
+**Interpretasi :**
+Gabah kering giling merupakan kualitas gabah yang paling baik dibanding dengan gabah kering panen maupun gabah luar kualitas. Dapat dilihat dari rata-rata kadar air dan kadar hampa/kotoran yang lebih rendah daripada gabah lain, yaitu sebesar 12.69 % dan 3.76 %. Kadar air gabah sangat berpengaruh terhadap proses penggilingan gabah karena bila kadar air terlalu tinggi atau lebih dari 14%, padi akan terasa lunak atau lembek, sehingga pada saat proses penggilingan akan menyebabkan padi menjadi patah. Gabah kering panen maupun gabah luar kualitas memiliki rata-rata kadar air sebesar 19.28 % dan 23.94 %, serta kadar hampa/kotoran sebesar 4.99 % dan 11.64 %.  Gabah kering giling juga memiliki rata-rata harga yang paling tinggi yaitu Rp 5.761,30, jika dibandingkan dengan rata-rata harga gabah kering panen dan gabah luar kualitas sebesar Rp 4.966,83 dan Rp 4.578,64. HPP gabah kering giling sebesar Rp 5.033,33 lebih tinggi daripada HPP gabah kering panen sebesar Rp 4.083,33. Dapat dikatakan pula bahwa gabah luar kualitas memiliki kualitas yang paling rendah, dengan rata-rata harga dan HPP terendah, serta kadar air dan kadar hampa/kotoran yang paling tinggi.
+
+```{r}
+summary(Ratarata_harga_gabah[c("Harga_GKG", "Harga_GKP", "Harga_GLK")])
+```
+**Interpretasi:**
+1. Harga Gabah Kering Giling
+   - Harga terendah untuk gabah kering giling pada tahun 2020 yaitu sebesar Rp 5.516,39. Jika dilihat pada tabel data, angka tersebut berada pada bulan Agustus 
+   - Harga tertinggi untuk gabah kering giling pada tahun 2020 berada pada bulan Juni yaitu sebesar Rp 5.957,84.
+   - Rata-rata harga gabah kering giling dari bulan Januari - September 2020 yaitu sebesar Rp 5.761,00.
+2. Harga Gabah Kering Panen
+   - Harga terendah untuk gabah kering panen pada tahun 2020 berada pada bulan April yaitu sebesar Rp 4.691,72.
+   - Harga tertinggi untuk gabah kering panen pada tahun 2020 berada pada bulan Januari yaitu sebesar Rp 5.370,89.
+   - Rata-rata harga gabah kering panen dari bulan Januari - September 2020 yaitu sebesar Rp 4.967,00.
+3. Harga Gabah Luar Kualitas
+   - Harga terendah untuk gabah luar kualitas pada tahun 2020 berada pada bulan Mei yaitu sebesar Rp 4.284,52.
+   - Harga tertinggi untuk gabah luar kualitas pada tahun 2020 berada pada bulan Februari yaitu sebesar Rp 4.882,96.
+   - Rata-rata harga gabah luar kualitas dari bulan Januari - September 2020 yaitu sebesar Rp 4.579,00.
+
+```{r}
+var(Ratarata_harga_gabah$Harga_GKG)
+var(Ratarata_harga_gabah$Harga_GKP)
+var(Ratarata_harga_gabah$Harga_GLK)
+```
+Gabah kering giling, gabah kering panen, dan gabah luar kualitas memiliki ragam berturut-turut sebesar 32447.86, 53504.22, dan 42737.15.
+
+
+
+
+## Visualisasi Data
+Data ini belum bisa divisualisasikan lebih lanjut, karena beberapa fungsi di R memerlukan data dengan format yang berbeda, yaitu “long format” atau “tidy data”. Untuk mengubahnya bisa menggunakan syntax melt() dari library reshape2.
+```{r}
+attach(Ratarata_harga_gabah)
+data_harga<-data.frame(Bulan, Harga_GKG, Harga_GKP, Harga_GLK)
+data_harga<-melt(data_harga, id.vars = "Bulan", variable.name = "Jenis", value.name = "Harga_Gabah")
+data_harga<-select(data_harga, Bulan, Jenis, Harga_Gabah)
+head(data_harga)
+
+ggplot(data_harga, aes(x=Bulan, y=Harga_Gabah, group=Jenis))+geom_line(aes(linetype=Jenis, color=Jenis))+geom_point(aes(color=Jenis))+theme(legend.position = "right")+labs(title = "Harga Gabah bulan Januari-September 2020", x="Bulan ke-", y="harga (Rp/kg)")+scale_y_continuous(breaks = seq(4200, 6050, 100))
+
+```
+
+**Interpretasi :**
+  - Harga gabah kering giling (warna merah muda) dari bulan Januari ke bulan Februari mengalami sedikit kenaikan, kemudian landai hingga bulan Mei. Dari bulan Mei ke bulan Juni mengalami kenaikan yang cukup tajam, lalu kembali mengalami penurunan yang cukup curam dari bulan Juni ke bulan Juli, kemudian mulai landai kembali hingga bulan September.
+  - Harga gabah kering panen (warna hijau) dari bulan Januari hingga bulan April Mengalami penurunan kemudian mengalami kenaikan kembali sedikit demi sedikit pada bulan April hingga bulan September.
+  - Harga gabah luar kualitas (warna biru) mengalami kenaikan pada bulan Januari ke bulan Februari, akan tetapi mengalami penurunan hingga bulan Mei, kemudian mengalami kenaikan kembali hingga September.
+  - Harga gabah yang paling tinggi disetiap bulan menurut kualitasnya adalah harga gabah kering giling, kemudian disusul oleh harga gabah kering panen, dan yang paling murah adalah gabah luar kualitas. 
+  
+```{r}
+#mengubah format data
+data_HPP<-data.frame(Bulan, HPP_GKG, HPP_GKP)
+data_HPP<-melt(data_HPP, id.vars = "Bulan", variable.name = "Jenis", value.name = "HPP")
+data_HPP<-select(data_HPP, Bulan, Jenis, HPP)
+head(data_HPP)
+ggplot(data_HPP, aes(x=Bulan, y=HPP, group=Jenis))+geom_line(aes(color=Jenis, size=Jenis))+geom_point()+scale_color_manual(values=c('#999999','#E69F00'))+
+  scale_size_manual(values=c(1, 1.5))+
+  theme(legend.position="right")+labs(title = "HPP GKG dan GKP bulan Januari-September 2020", x="Bulan ke-", y="Harga Pembelian Pemerintah (Rp/kg)")+scale_y_continuous(breaks = seq(3600, 5400, 100))
+```
+
+**Interpretasi :**
+Harga pembelian pemerintah untuk gabah kering giling maupun gabah Kering panen stabil dari bulan Januari hingga bulan Maret kemudian mengalami kenaikan yang cukup tinggi pada bulan April, dan tidak mengalami perubahan harga hingga bulan September.
+```{r}
+kenaikan_HPP_GKG <- (Ratarata_harga_gabah$HPP_GKG[4] - Ratarata_harga_gabah$HPP_GKG[3]) / Ratarata_harga_gabah$HPP_GKG[3] * 100
+paste("Persentase kenaikan HPP Gabah Kering Giling sebesar" ,paste(round(kenaikan_HPP_GKG, digits = 2), "%", sep=" "), sep = " ")
+
+kenaikan_HPP_GKP <- (Ratarata_harga_gabah$HPP_GKP[4] - Ratarata_harga_gabah$HPP_GKP[3]) / Ratarata_harga_gabah$HPP_GKP[3] * 100
+paste("Persentase kenaikan HPP Gabah Kering Panen sebesar" ,paste(round(kenaikan_HPP_GKP, digits = 2), "%", sep=" "), sep = " ")
+```
+
+```{r}
+ggplot(data_harga, aes(x=Jenis, y=Harga_Gabah, fill=Jenis))+geom_boxplot()+labs(title = "Box Plot Harga Gabah Berdasarkan Jenis")+scale_y_continuous(breaks = seq(4200, 6050, 100))
+
+```
+
+**Interpretasi :**
+Berdasarkan boxplot di atas, dapat dilihat bahwa harga gabah kering giling (boxplot warna pink) merupakan harga gabah yang paling tinggi dibandingkan dengan kualitas gabah lainnya. Dengan nilai maximum sekitar 5950, nilai kuartil 3 sekitar 5900, nilai median sekitar 5800, nilai kuartil 1 sekitar 5600, dan nilai minimum sekitar 5525.
+Boxplot warna hijau adalah boxplot harga gabah kering panen. Dapat dilihat bahwa boxplot tersebut memiliki outlier pada nilai maksimum yaitu sekitar 5370, dengan nilai kuartil 3 sekitar 5050, nilai median sekitar 4900, nilai kuartil 1 sekitar 4800, dan nilai minimum sekitar 4700.
+Boxplot warna biru adalah boxplot harga gabah luar kualitas. Harga gabah luar kualitas merupakan harga gabah yang paling rendah jika dibandingkan kualitas lainnya. Dengan nilai maksimum sekitar 4900, nilai kuartil 3 sekitar 4700, nilai median sekitar 4600, nilai kuartil 1 sekitar 4460, dan nilai minimum sekitar 4300.
+_(dapat di cek pada summary (ukuran pemusatan) di awal)_
+
+```{r}
+corrplot(cor(Ratarata_harga_gabah[2:10]), method = "ellipse")
+```
+
+**Interpretasi :**
+Pada plot korelasi di atas, dapat dilihat bahwa harga gabah kering giling memiliki korelasi negatif yang cukup kuat dengan kadar hampa/kotoran gabah kering giling hal tersebut dapat dikatakan bahwa apabila harga gabah kering giling tinggi, maka kadar hampa/kotoran gabah kering giling rendah.
+
+
+
+
+
+
+
+
+
+
+
+
+
